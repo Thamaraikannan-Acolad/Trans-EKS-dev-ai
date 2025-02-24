@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "-----------"
 }
 
 # VPC Creation
@@ -12,7 +12,7 @@ resource "aws_subnet" "public1" {
   vpc_id                  = aws_vpc.eks_vpc.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-1a"
+  availability_zone       = "eu-central-1a"
 }
 
 # Subnet 2
@@ -20,7 +20,7 @@ resource "aws_subnet" "public2" {
   vpc_id                  = aws_vpc.eks_vpc.id
   cidr_block              = "10.0.2.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-1b"
+  availability_zone       = "eu-central-1b"
 }
 
 # IAM Role for EKS Cluster
@@ -48,7 +48,11 @@ resource "aws_iam_role_policy_attachment" "eks_policy" {
   role       = aws_iam_role.eks_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
-
+resource "aws_iam_role_policy_attachment"
+"eks_cloudwatch_policy"{
+  role   = aws_iam_role.eks_role.name
+  policy_arn = "--------"
+}
 # IAM Role for Node Group
 resource "aws_iam_role" "node_role" {
   name = "eks-node-group-role"
@@ -74,17 +78,24 @@ resource "aws_iam_role_policy_attachment" "node_policy" {
   role       = aws_iam_role.node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
+resource "aws_iam_role_policy_attachment"
+"node_cloudwatch_policy"{
+  role   = aws_iam_role.node_role.name
+  policy_arn = "--------"
+}
 
 # EKS Cluster Creation
-resource "aws_eks_cluster" "dev_ai" {
+resource "trans_eks_cluster" "dev_ai" {
   name     = "dev-ai"
   role_arn = aws_iam_role.eks_role.arn
 
   vpc_config {
     subnet_ids = [aws_subnet.public1.id, aws_subnet.public2.id]
   }
+# Enable CloudWatch Logging  
+enabled_cluster_logs_types = ["api", "audit", "authenticator", "ControllerManager", "scheduler"]
 
-  depends_on = [aws_iam_role_policy_attachment.eks_policy]
+  depends_on = [aws_iam_role_policy_attachment.eks_policy, aws_iam_role_policy_attachment.eks_cloudwatch_policy]
 }
 
 # EKS Node Group Creation
@@ -100,4 +111,5 @@ resource "aws_eks_node_group" "dev_ai_nodes" {
     min_size     = 1
     max_size     = 3
   }
+depends_on = [aws_iam_role_policy_attachment.node_policy, aws_iam_role_policy_attachment.node_cloudwatch_policy]
 }

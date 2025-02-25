@@ -1,31 +1,31 @@
 provider "aws" {
-  region = "-----------"
+  region = "-----------" #eu-central-1
 }
 
 # VPC Creation
 resource "aws_vpc" "trans_eks_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "--------" #10.0.0.0/16
 }
 
 # Subnet 1
-resource "aws_subnet" "public1" {
+resource "aws_subnet" "trans_public1" {
   vpc_id                  = aws_vpc.trans_eks_vpc.id
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = "-------" #10.0.1.0/24
   map_public_ip_on_launch = true
-  availability_zone       = "--------a"
+  availability_zone       = "--------" #eu-central-1a
 }
 
 # Subnet 2
-resource "aws_subnet" "public2" {
+resource "aws_subnet" "trans_public2" {
   vpc_id                  = aws_vpc.trans_eks_vpc.id
-  cidr_block              = "10.0.2.0/24"
+  cidr_block              = "--------" #10.0.2.0/24
   map_public_ip_on_launch = true
-  availability_zone       = "---------b"
+  availability_zone       = "---------" #eu-central-1b
 }
 
 # IAM Role for EKS Cluster
 resource "aws_iam_role" "trans_eks_role" {
-  name = "trans-eks-cluster-role"
+  name = "trans-eks-cluster-role" 
 
   assume_role_policy =<<EOF
 {
